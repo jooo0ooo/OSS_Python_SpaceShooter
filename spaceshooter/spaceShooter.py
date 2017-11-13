@@ -1,27 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: tasdik
-# @Contributers : Branden (Github: @bardlean86)
-# @Date:   2016-01-17
-# @Email:  prodicus@outlook.com  Github: @tasdikrahman
-# @Last Modified by:   tasdik
-# @Last Modified by:   Branden
-# @Last Modified time: 2016-01-26
+# @Original Author: tasdik
+# @Original Contributers : Branden (Github: @bardlean86)
+# @Original Author's Email:  prodicus@outlook.com  Github: @tasdikrahman
+# @Original OSS URL : https://github.com/tasdikrahman/spaceShooter
 # MIT License. You can find a copy of the License @ http://prodicus.mit-license.org
 
-## Game music Attribution
-##Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3 <http://creativecommons.org/licenses/by/3.0/>
-
-## Additional assets by: Branden M. Ardelean (Github: @bardlean86)
+# Modified by Jiwoo Jung
+# Why would you change it?
+# -> For studying python
+# How would you change it?
+# -> Add new functions
+# You can see the changing process at https://github.com/pingrae/OSS_Python_SpaceShooter
 
 from __future__ import division
 import pygame
 import random
 from os import path
 
+#Code added by Jiwoo
+#for using bash
+#we should 'import subprocess' for using subprocess Module
+import subprocess
+
 ## assets folder
 img_dir = path.join(path.dirname(__file__), 'assets')
 sound_folder = path.join(path.dirname(__file__), 'sounds')
+
+#Code added by Jiwoo
+make_dialog = path.join(path.dirname(__file__), 'make_dialog')
+music_flag = 0 #To distinguish between default playing and user_setting playing
 
 ###############################
 ## to be placed in "constant.py" later
@@ -56,6 +64,9 @@ font_name = pygame.font.match_font('arial')
 def main_menu():
     global screen
 
+    # Code added by Jiwoo
+    global music_flag #To use global variable, music_flag
+
     menu_song = pygame.mixer.music.load(path.join(sound_folder, "menu.ogg"))
     pygame.mixer.music.play(-1)
 
@@ -73,9 +84,24 @@ def main_menu():
             elif ev.key == pygame.K_q:
                 pygame.quit()
                 quit()
+
+            # Code added by Jiwoo
+            # When the user press the T-key on keyboard, go into the conditional statement
+            elif ev.key == pygame.K_t:
+                #Use subprocess Module to execute bash command in a python script
+                subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')])
+                #change value of music_flag
+                music_flag = 1
+                break
+
         else:
             draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH/2, HEIGHT/2)
             draw_text(screen, "or [Q] To Quit", 30, WIDTH/2, (HEIGHT/2)+40)
+
+            # Code added by Jiwoo
+            #Add Text in main_menu to give users additional option
+            draw_text(screen, "Play with Ur Music -> Press [T]", 30, WIDTH/2, (HEIGHT/2)+80)
+
             pygame.display.update()
 
     #pygame.mixer.music.stop()
@@ -159,8 +185,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
-        
-        #jiwoo add below a line
+
+        # Code added by Jiwoo
         #winitializing for first speed of up_down
         self.speedy = 0
         
@@ -187,7 +213,7 @@ class Player(pygame.sprite.Sprite):
 
         self.speedx = 0     ## makes the player static in the screen by default. 
 
-        #jiwoo add below line
+        # Code added by Jiwoo
         self.speedy = 0     ## makes the player static in the screen by default. 
 
         # then we have to check whether there is an event hanlding being done for the arrow keys being 
@@ -200,7 +226,7 @@ class Player(pygame.sprite.Sprite):
         elif keystate[pygame.K_RIGHT]:
             self.speedx = 5
 
-        #jiwoo add below lines
+        # Code added by Jiwoo
         elif keystate[pygame.K_UP]: #when pressing UP Key
             self.speedy = -5
         elif keystate[pygame.K_DOWN]: #when pressing DOWN Key
@@ -216,7 +242,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
-        #jiwoo add below lines
+        # Code added by Jiwoo
         #To prevent user_object(airplane) from leaving out of the screen
         if self.rect.bottom > HEIGHT - 30:
             self.rect.bottom = HEIGHT - 30
@@ -224,7 +250,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.top = 0
 
         self.rect.x += self.speedx
-        #jiwoo add below a line
+
+        # Code added by Jiwoo
         self.rect.y += self.speedy #Adjust the vertical position
 
     def shoot(self):
@@ -483,9 +510,23 @@ while running:
         #Stop menu music
         pygame.mixer.music.stop()
         #Play the gameplay music
-        pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-        pygame.mixer.music.play(-1)     ## makes the gameplay sound in an endless loop
-        
+
+        # Code added by Jiwoo
+        if music_flag == 1:
+            #Read the user's music path
+            text_dir = path.join(path.dirname(__file__), 'text')
+            f = open(path.join(text_dir, 'user_music_location.txt'), 'r')
+            line = f.readline()
+            my_song = line
+            f.close()
+            #play with user's music
+            pygame.mixer.music.load(my_song)
+            pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
+        elif music_flag == 0:
+            #default play
+            pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
+            pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
+
         menu_display = False
         
     #1 Process input/events
