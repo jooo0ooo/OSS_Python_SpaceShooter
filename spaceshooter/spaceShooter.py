@@ -158,7 +158,12 @@ class Player(pygame.sprite.Sprite):
         self.radius = 20
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
-        self.speedx = 0 
+        self.speedx = 0
+        
+        #jiwoo add below a line
+        #winitializing for first speed of up_down
+        self.speedy = 0
+        
         self.shield = 100
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
@@ -181,6 +186,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT - 30
 
         self.speedx = 0     ## makes the player static in the screen by default. 
+
+        #jiwoo add below line
+        self.speedy = 0     ## makes the player static in the screen by default. 
+
         # then we have to check whether there is an event hanlding being done for the arrow keys being 
         ## pressed 
 
@@ -190,6 +199,12 @@ class Player(pygame.sprite.Sprite):
             self.speedx = -5
         elif keystate[pygame.K_RIGHT]:
             self.speedx = 5
+
+        #jiwoo add below lines
+        elif keystate[pygame.K_UP]: #when pressing UP Key
+            self.speedy = -5
+        elif keystate[pygame.K_DOWN]: #when pressing DOWN Key
+            self.speedy = 5
 
         #Fire weapons by holding spacebar
         if keystate[pygame.K_SPACE]:
@@ -201,7 +216,16 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+        #jiwoo add below lines
+        #To prevent user_object(airplane) from leaving out of the screen
+        if self.rect.bottom > HEIGHT - 30:
+            self.rect.bottom = HEIGHT - 30
+        if self.rect.top < 0:
+            self.rect.top = 0
+
         self.rect.x += self.speedx
+        #jiwoo add below a line
+        self.rect.y += self.speedy #Adjust the vertical position
 
     def shoot(self):
         ## to tell the bullet where to spawn
