@@ -30,6 +30,7 @@ sound_folder = path.join(path.dirname(__file__), 'sounds')
 #Code added by Jiwoo
 make_dialog = path.join(path.dirname(__file__), 'make_dialog')
 music_flag = 0 #To distinguish between default playing and user_setting playing
+dual_play_flag = 0 #To distinguish between default playing and user_setting playing
 
 ###############################
 ## to be placed in "constant.py" later
@@ -66,6 +67,7 @@ def main_menu():
 
     # Code added by Jiwoo
     global music_flag #To use global variable, music_flag
+    global dual_play_flag #To use global variable, dual_play_flag
 
     menu_song = pygame.mixer.music.load(path.join(sound_folder, "menu.ogg"))
     pygame.mixer.music.play(-1)
@@ -93,6 +95,11 @@ def main_menu():
                 #change value of music_flag
                 music_flag = 1
                 break
+            # When the user press the D-key on keyboard, go into the conditional statement
+            elif ev.key == pygame.K_d:
+                #change value of dual_play_flag
+                dual_play_flag = 1
+                break
 
         else:
             draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH/2, HEIGHT/2)
@@ -100,7 +107,8 @@ def main_menu():
 
             # Code added by Jiwoo
             #Add Text in main_menu to give users additional option
-            draw_text(screen, "Play with Ur Music -> Press [T]", 30, WIDTH/2, (HEIGHT/2)+80)
+            draw_text(screen, "Press [T] To Play With Ur Music", 30, WIDTH/2, (HEIGHT/2)+80)
+            draw_text(screen, "Press [D] To Play With A Friend", 30, WIDTH/2, (HEIGHT/2)+120)
 
             pygame.display.update()
 
@@ -296,6 +304,119 @@ class Player(pygame.sprite.Sprite):
         self.hide_timer = pygame.time.get_ticks()
         self.rect.center = (WIDTH / 2, HEIGHT + 200)
 
+# Code added by Jiwoo
+# For dual playing, add another player object
+class Player2(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        ## scale the player img down
+        self.image = pygame.transform.scale(player2_img, (50, 38))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.radius = 20
+        self.rect.centerx = WIDTH / 3 * 2
+        self.rect.bottom = HEIGHT - 10
+        self.speedx = 0
+        self.speedy = 0
+        
+        self.shield = 100
+        self.shoot_delay = 250
+        self.last_shot = pygame.time.get_ticks()
+        self.lives = 3
+        self.hidden = False
+        self.hide_timer = pygame.time.get_ticks()
+        self.power = 1
+        self.power_timer = pygame.time.get_ticks()
+
+    def update(self):
+        ## time out for powerups
+        if self.power >=2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
+            self.power -= 1
+            self.power_time = pygame.time.get_ticks()
+
+        ## unhide 
+        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
+            self.hidden = False
+            self.rect.centerx = WIDTH / 2
+            self.rect.bottom = HEIGHT - 30
+
+        self.speedx = 0     ## makes the player static in the screen by default.
+        self.speedy = 0     ## makes the player static in the screen by default. 
+
+        # then we have to check whether there is an event hanlding being done for the arrow keys being 
+        ## pressed 
+
+        ## will give back a list of the keys which happen to be pressed down at that moment
+        keystate = pygame.key.get_pressed()     
+        if keystate[pygame.K_f]:
+            self.speedx = -5
+        elif keystate[pygame.K_h]:
+            self.speedx = 5
+        elif keystate[pygame.K_t]:
+            self.speedy = -5
+        elif keystate[pygame.K_g]:
+            self.speedy = 5
+
+        #Fire weapons by holding spacebar
+        if keystate[pygame.K_z]:
+            self.shoot()
+
+        ## check for the borders at the left and right
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0:
+            self.rect.left = 0
+
+        if self.rect.bottom > HEIGHT - 30:
+            self.rect.bottom = HEIGHT - 30
+        if self.rect.top < 0:
+            self.rect.top = 0
+
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy #Adjust the vertical position
+
+    def shoot(self):
+        ## to tell the bullet where to spawn
+        now = pygame.time.get_ticks()
+        if now - self.last_shot > self.shoot_delay:
+            self.last_shot = now
+            if self.power == 1:
+                bullet = Bullet(self.rect.centerx, self.rect.top)
+                all_sprites.add(bullet)
+                bullets.add(bullet)
+                shooting_sound.play()
+            if self.power == 2:
+                bullet1 = Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet(self.rect.right, self.rect.centery)
+                all_sprites.add(bullet1)
+                all_sprites.add(bullet2)
+                bullets.add(bullet1)
+                bullets.add(bullet2)
+                shooting_sound.play()
+
+            """ MOAR POWAH """
+            if self.power >= 3:
+                bullet1 = Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet(self.rect.right, self.rect.centery)
+                missile1 = Missile(self.rect.centerx, self.rect.top) # Missile shoots from center of ship
+                all_sprites.add(bullet1)
+                all_sprites.add(bullet2)
+                all_sprites.add(missile1)
+                bullets.add(bullet1)
+                bullets.add(bullet2)
+                bullets.add(missile1)
+                shooting_sound.play()
+                missile_sound.play()
+
+    def powerup(self):
+        self.power += 1
+        self.power_time = pygame.time.get_ticks()
+
+    def hide(self):
+        self.hidden = True
+        self.hide_timer = pygame.time.get_ticks()
+        self.rect.center = (WIDTH / 2, HEIGHT + 200)
+
 
 # defines the enemies
 class Mob(pygame.sprite.Sprite):
@@ -412,6 +533,13 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
+
+# Code added by Jiwoo
+# Setting for another player
+player2_img = pygame.image.load(path.join(img_dir, 'playerShip2_orange.png')).convert()
+player_mini_img2 = pygame.transform.scale(player2_img, (25, 19))
+player_mini_img2.set_colorkey(BLACK)
+
 bullet_img = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
 missile_img = pygame.image.load(path.join(img_dir, 'missile.png')).convert_alpha()
 # meteor_img = pygame.image.load(path.join(img_dir, 'meteorBrown_med1.png')).convert()
@@ -434,6 +562,10 @@ explosion_anim = {}
 explosion_anim['lg'] = []
 explosion_anim['sm'] = []
 explosion_anim['player'] = []
+
+# Code added by Jiwoo
+explosion_anim['player2'] = []
+
 for i in range(9):
     filename = 'regularExplosion0{}.png'.format(i)
     img = pygame.image.load(path.join(img_dir, filename)).convert()
@@ -449,6 +581,9 @@ for i in range(9):
     img = pygame.image.load(path.join(img_dir, filename)).convert()
     img.set_colorkey(BLACK)
     explosion_anim['player'].append(img)
+
+    # Code added by Jiwoo
+    explosion_anim['player2'].append(img)
 
 ## load power ups
 powerup_images = {}
@@ -468,7 +603,10 @@ for sound in ['expl3.wav', 'expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(path.join(sound_folder, sound)))
 ## main background music
 #pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-pygame.mixer.music.set_volume(0.2)      ## simmered the sound down a little
+
+#pygame.mixer.music.set_volume(0.2)      ## simmered the sound down a little
+# Code added by Jiwoo
+pygame.mixer.music.set_volume(3)
 
 player_die_sound = pygame.mixer.Sound(path.join(sound_folder, 'rumble1.ogg'))
 ###################################################
@@ -476,6 +614,10 @@ player_die_sound = pygame.mixer.Sound(path.join(sound_folder, 'rumble1.ogg'))
 ## group all the sprites together for ease of update
 all_sprites = pygame.sprite.Group()
 player = Player()
+
+# Code added by Jiwoo
+player2 = Player2()
+
 all_sprites.add(player)
 
 ## spawn a group of mob
@@ -522,6 +664,15 @@ while running:
             #play with user's music
             pygame.mixer.music.load(my_song)
             pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
+
+        #Setting for dual play mode
+        elif dual_play_flag == 1:
+            all_sprites.add(player2)
+            player.rect.centerx = WIDTH / 3
+            player.rect.bottom = HEIGHT
+            pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
+            pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
+
         elif music_flag == 0:
             #default play
             pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
@@ -587,6 +738,23 @@ while running:
             player.lives -= 1
             player.shield = 100
 
+    # Code added by Jiwoo
+    # Setting for another player
+    hits = pygame.sprite.spritecollide(player2, mobs, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hits:
+        player2.shield -= hit.radius * 2
+        expl = Explosion(hit.rect.center, 'sm')
+        all_sprites.add(expl)
+        newmob()
+        if player2.shield <= 0:
+            player_die_sound.play()
+            death_explosion2 = Explosion(player2.rect.center, 'player2')
+            all_sprites.add(death_explosion2)
+            # running = False     ## GAME OVER 3:D
+            player2.hide()
+            player2.lives -= 1
+            player2.shield = 100
+
     ## if the player hit a power up
     hits = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits:
@@ -597,11 +765,25 @@ while running:
         if hit.type == 'gun':
             player.powerup()
 
+    # Code added by Jiwoo
+    # Setting for another player
+    hits = pygame.sprite.spritecollide(player2, powerups, True)
+    for hit in hits:
+        if hit.type == 'shield':
+            player2.shield += random.randrange(10, 30)
+            if player2.shield >= 100:
+                player2.shield = 100
+        if hit.type == 'gun':
+            player2.powerup()
+
+
+    
     ## if player died and the explosion has finished, end game
     if player.lives == 0 and not death_explosion.alive():
         running = False
         # menu_display = True
         # pygame.display.update()
+    
 
     #3 Draw/render
     screen.fill(BLACK)
@@ -611,6 +793,22 @@ while running:
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH / 2, 10)     ## 10px down from the screen
     draw_shield_bar(screen, 5, 5, player.shield)
+
+    # Code added by Jiwoo
+    if dual_play_flag == 1:
+        #draw shield_bar For player2
+        draw_shield_bar(screen, 5, 30, player2.shield)
+        #draw lives_bar For player2
+        draw_lives(screen, WIDTH - 100, 30, player2.lives, player_mini_img2)
+
+        #If either of them is alive, the program will not shut down.
+        if player.lives == 0 and not player2.lives == 0:
+            player.kill()
+        elif player2.lives == 0 and not player.lives == 0:
+            player2.kill()
+        #When both are dead, the program shuts down.
+        elif player2.lives == 0  and player.lives == 0:
+            running = False
 
     # Draw lives
     draw_lives(screen, WIDTH - 100, 5, player.lives, player_mini_img)
