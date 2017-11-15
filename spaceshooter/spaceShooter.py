@@ -62,6 +62,36 @@ clock = pygame.time.Clock()     ## For syncing the FPS
 
 font_name = pygame.font.match_font('arial')
 
+# Code added by Jiwoo
+# To Show Operation Guide
+def operation_guide():
+    global screen
+
+    title = pygame.image.load(path.join(img_dir, "operation_guide.png")).convert()
+    title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
+
+    screen.blit(title, (0,0))
+    pygame.display.update()
+    
+    while True:
+        #When the user pulls off his hand from TAB-key
+        #go back to the menu screen
+        ev = pygame.event.poll()
+        if ev.type == pygame.KEYUP:
+            if ev.key == pygame.K_TAB:
+                title = pygame.image.load(path.join(img_dir, "main.png")).convert()
+                title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
+                screen.blit(title, (0, 0))
+
+                draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH / 2, HEIGHT / 2)
+                draw_text(screen, "or [Q] To Quit", 30, WIDTH / 2, (HEIGHT / 2) + 40)
+                draw_text(screen, "Press [T] To Play With Ur Music", 30, WIDTH / 2, (HEIGHT / 2) + 80)
+                draw_text(screen, "Press [D] To Play With A Friend", 30, WIDTH / 2, (HEIGHT / 2) + 120)
+                draw_text(screen, "Press [TAB] To See Operation Guide", 25, WIDTH / 2, (HEIGHT - 40))
+                pygame.display.update()
+                break
+
+
 def main_menu():
     global screen
 
@@ -100,6 +130,9 @@ def main_menu():
                 #change value of dual_play_flag
                 dual_play_flag = 1
                 break
+            #when the user press the TAB-key on keyboard, he can see the operation guide
+            elif ev.key == pygame.K_TAB:
+                operation_guide()
 
         else:
             draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH/2, HEIGHT/2)
@@ -109,6 +142,7 @@ def main_menu():
             #Add Text in main_menu to give users additional option
             draw_text(screen, "Press [T] To Play With Ur Music", 30, WIDTH/2, (HEIGHT/2)+80)
             draw_text(screen, "Press [D] To Play With A Friend", 30, WIDTH/2, (HEIGHT/2)+120)
+            draw_text(screen, "Press [TAB] To See Operation Guide", 25, WIDTH / 2, (HEIGHT - 40))
 
             pygame.display.update()
 
