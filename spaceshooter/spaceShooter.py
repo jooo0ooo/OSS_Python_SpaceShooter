@@ -31,6 +31,9 @@ sound_folder = path.join(path.dirname(__file__), 'sounds')
 make_dialog = path.join(path.dirname(__file__), 'make_dialog')
 music_flag = 0 #To distinguish between default playing and user_setting playing
 dual_play_flag = 0 #To distinguish between default playing and user_setting playing
+life_count = 1 #To make lifeup item
+death_count = 1 #To make lifedown item
+death_count2 = 1 #To make lifedown item one more
 
 ###############################
 ## to be placed in "constant.py" later
@@ -184,12 +187,26 @@ def draw_lives(surf, x, y, lives, img):
         img_rect.y = y
         surf.blit(img, img_rect)
 
-
-
 def newmob():
     mob_element = Mob()
     all_sprites.add(mob_element)
     mobs.add(mob_element)
+
+# Code added by Jiwoo
+def bonus(): #make bonus item
+    bonus_element = Bonus()
+    all_sprites.add(bonus_element)
+    bonuses.add(bonus_element)
+
+def newlife(): #make lifeup item
+    life_element = Life()
+    all_sprites.add(life_element)
+    lifes.add(life_element)
+
+def newdeath(): #make lifedown item
+    death_element = Death()
+    all_sprites.add(death_element)
+    deaths.add(death_element)
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
@@ -451,6 +468,73 @@ class Player2(pygame.sprite.Sprite):
         self.hide_timer = pygame.time.get_ticks()
         self.rect.center = (WIDTH / 2, HEIGHT + 200)
 
+# Code added by Jiwoo
+class Bonus(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = item_puppy['puppy']
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-150, -100)
+        self.speedy = random.randrange(5, 20)
+        self.speedx = random.randrange(-3, 3)
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+
+        if (self.rect.top > HEIGHT + 10) or (self.rect.left < -25) or (self.rect.right > WIDTH + 20):
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 8)
+            
+        if score > 20000:
+            self.kill()
+
+
+class Life(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = item_images['life+']
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-150, -100)
+        self.speedy = random.randrange(5, 20)
+        self.speedx = random.randrange(-3, 3)
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+
+        if (self.rect.top > HEIGHT + 10) or (self.rect.left < -25) or (self.rect.right > WIDTH + 20):
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 8)
+            
+        if score > 5000:
+            self.kill()
+
+class Death(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = item_images['life-']
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-150, -100)
+        self.speedy = random.randrange(5, 20)
+        self.speedx = random.randrange(-3, 3)
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+
+        if (self.rect.top > HEIGHT + 10) or (self.rect.left < -25) or (self.rect.right > WIDTH + 20):
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 8)
 
 # defines the enemies
 class Mob(pygame.sprite.Sprite):
@@ -624,6 +708,13 @@ powerup_images = {}
 powerup_images['shield'] = pygame.image.load(path.join(img_dir, 'shield_gold.png')).convert()
 powerup_images['gun'] = pygame.image.load(path.join(img_dir, 'bolt_gold.png')).convert()
 
+#Code added by jiwoo
+item_images = {}
+item_images['life+'] = pygame.image.load(path.join(img_dir, 'item_red.png')).convert()
+item_images['life-'] = pygame.image.load(path.join(img_dir, 'item_yello.png')).convert()
+
+item_puppy = {}
+item_puppy['puppy'] = pygame.image.load(path.join(img_dir, 'item_bonus.png')).convert()
 
 ###################################################
 
@@ -661,6 +752,11 @@ for i in range(8):      ## 8 mobs
     # all_sprites.add(mob_element)
     # mobs.add(mob_element)
     newmob()
+
+# Code added by Jiwoo
+lifes = pygame.sprite.Group()
+deaths = pygame.sprite.Group()
+bonuses = pygame.sprite.Group()
 
 ## group for bullets
 bullets = pygame.sprite.Group()
@@ -773,6 +869,58 @@ while running:
             player.shield = 100
 
     # Code added by Jiwoo
+    if score> 10000 :
+        bonus()
+
+    for i in (1, 10, 2):
+        if score > 1000 * i and life_count == i:
+            newlife()
+            life_count += 1
+
+    for i in range(1, 10, 2):
+        if score > 500 * i and death_count == i:
+            newdeath()
+            death_count += 1
+
+    for i in range(1, 10, 2):
+        if score > 1000 * i and death_count2 == i:
+            newdeath()
+            newdeath()
+            death_count2 += 1
+
+    hit_bonus = pygame.sprite.spritecollide(player, bonuses, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_bonus:
+        score += 100
+
+    hit_life = pygame.sprite.spritecollide(player, lifes, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_life:
+        newlife()
+        if(player.lives < 5):
+            player.lives += 1
+
+    hit_death = pygame.sprite.spritecollide(player, deaths, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_death:
+        newdeath()
+        if(player.lives >1):
+            player.lives -= 1
+
+    hit_bonus = pygame.sprite.spritecollide(player2, bonuses, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_bonus:
+        score += 100
+
+    hit_life = pygame.sprite.spritecollide(player2, lifes, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_life:
+        newlife()
+        if(player.lives < 5):
+            player.lives += 1
+
+    hit_death = pygame.sprite.spritecollide(player2, deaths, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
+    for hit in hit_death:
+        newdeath()
+        if(player.lives >1):
+            player.lives -= 1
+            
+    # Code added by Jiwoo
     # Setting for another player
     hits = pygame.sprite.spritecollide(player2, mobs, True, pygame.sprite.collide_circle)  ## gives back a list, True makes the mob element disappear
     for hit in hits:
@@ -813,10 +961,11 @@ while running:
 
     
     ## if player died and the explosion has finished, end game
-    if player.lives == 0 and not death_explosion.alive():
-        running = False
-        # menu_display = True
-        # pygame.display.update()
+    if dual_play_flag == 0:
+        if player.lives == 0 and not death_explosion.alive():
+            running = False
+            # menu_display = True
+            # pygame.display.update()
     
 
     #3 Draw/render
@@ -833,7 +982,7 @@ while running:
         #draw shield_bar For player2
         draw_shield_bar(screen, 5, 30, player2.shield)
         #draw lives_bar For player2
-        draw_lives(screen, WIDTH - 100, 30, player2.lives, player_mini_img2)
+        draw_lives(screen, WIDTH - 150, 30, player2.lives, player_mini_img2)
 
         #If either of them is alive, the program will not shut down.
         if player.lives == 0 and not player2.lives == 0:
@@ -845,7 +994,7 @@ while running:
             running = False
 
     # Draw lives
-    draw_lives(screen, WIDTH - 100, 5, player.lives, player_mini_img)
+    draw_lives(screen, WIDTH - 150, 5, player.lives, player_mini_img)
 
     ## Done after drawing everything to the screen
     pygame.display.flip()       
