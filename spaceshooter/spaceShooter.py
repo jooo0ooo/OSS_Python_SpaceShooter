@@ -23,6 +23,9 @@ from os import path
 #we should 'import subprocess' for using subprocess Module
 import subprocess
 
+import os
+import sys
+
 ## assets folder
 img_dir = path.join(path.dirname(__file__), 'assets')
 sound_folder = path.join(path.dirname(__file__), 'sounds')
@@ -155,7 +158,38 @@ def main_menu():
     screen.fill(BLACK)
     draw_text(screen, "GET READY!", 40, WIDTH/2, HEIGHT/2)
     pygame.display.update()
-    
+
+# Code added by Jiwoo
+def game_over():
+    global screen
+    global running
+
+    menu_song = pygame.mixer.music.load(path.join(sound_folder, "menu.ogg"))
+    pygame.mixer.music.play(-1)
+
+    title = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
+    title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
+
+
+    screen.blit(title, (0,0))
+
+    pygame.display.update()
+
+    while True:
+        ev = pygame.event.poll()
+        if ev.type == pygame.KEYDOWN:
+            if ev.key == pygame.K_RETURN:
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+                break
+            elif ev.key == pygame.K_ESCAPE:
+                pygame.quit()
+                quit()
+        else:
+            draw_text(screen, "GAME OVER", 100, WIDTH/2, HEIGHT/2 - 200)
+            draw_text(screen, "Press [ENTER] To Play Again", 30, WIDTH/2, HEIGHT/2)
+            draw_text(screen, "or [ESC] To Quit", 30, WIDTH/2, (HEIGHT/2)+40)
+            pygame.display.update()
+
 
 def draw_text(surf, text, size, x, y):
     ## selecting a cross platform font to display the score
@@ -963,7 +997,8 @@ while running:
     ## if player died and the explosion has finished, end game
     if dual_play_flag == 0:
         if player.lives == 0 and not death_explosion.alive():
-            running = False
+            game_over()
+            #running = False
             # menu_display = True
             # pygame.display.update()
     
@@ -991,7 +1026,8 @@ while running:
             player2.kill()
         #When both are dead, the program shuts down.
         elif player2.lives == 0  and player.lives == 0:
-            running = False
+            game_over()
+            #running = False
 
     # Draw lives
     draw_lives(screen, WIDTH - 150, 5, player.lives, player_mini_img)
