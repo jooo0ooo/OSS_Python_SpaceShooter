@@ -744,11 +744,11 @@ powerup_images['gun'] = pygame.image.load(path.join(img_dir, 'bolt_gold.png')).c
 
 #Code added by jiwoo
 item_images = {}
-item_images['life+'] = pygame.image.load(path.join(img_dir, 'item_red.png')).convert()
-item_images['life-'] = pygame.image.load(path.join(img_dir, 'item_yello.png')).convert()
+item_images['life+'] = pygame.image.load(path.join(img_dir, 'item_red.png')).convert_alpha()
+item_images['life-'] = pygame.image.load(path.join(img_dir, 'item_yello.png')).convert_alpha()
 
 item_puppy = {}
-item_puppy['puppy'] = pygame.image.load(path.join(img_dir, 'item_bonus.png')).convert()
+item_puppy['puppy'] = pygame.image.load(path.join(img_dir, 'item_bonus.png')).convert_alpha()
 
 ###################################################
 
