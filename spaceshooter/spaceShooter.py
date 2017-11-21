@@ -18,6 +18,10 @@ import pygame
 import random
 from os import path
 
+#Code added by doo
+from tkinter import *
+from tkinter import messagebox
+
 #Code added by Jiwoo
 #for using bash
 #we should 'import subprocess' for using subprocess Module
@@ -29,6 +33,10 @@ import sys
 ## assets folder
 img_dir = path.join(path.dirname(__file__), 'assets')
 sound_folder = path.join(path.dirname(__file__), 'sounds')
+
+#Code added by doo
+root = Tk() ##tk 윈도우 생성
+root.withdraw() ##아마도 이게 윈도우 가리게 해주는 함수같음
 
 #Code added by Jiwoo
 make_dialog = path.join(path.dirname(__file__), 'make_dialog')
@@ -120,7 +128,12 @@ def main_menu():
             if ev.key == pygame.K_RETURN:
                 break
             elif ev.key == pygame.K_q:
-                pygame.quit()
+                #Code added by doo
+                if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
+                    pygame.quit()
+                    quit()
+                else:
+                    continue
                 quit()
 
             # Code added by Jiwoo
