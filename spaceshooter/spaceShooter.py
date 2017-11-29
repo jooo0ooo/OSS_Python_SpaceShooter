@@ -209,18 +209,7 @@ def game_over():
                 highscore.cur.close()
                 highscore.db.commit()
                 highscore.db.close()
-                print(sys.executable)
-                print(sys.argv)
-                print([sys.executable] + sys.argv)
-                executable = sys.executable
-                args = sys.argv[:]
-                args.insert(0,sys.executable)
-                os.execvp(sys.executable,sys.argv)
-                #1os.execv(__file__,sys.argv)
-                #os.execv(sys.executable, ['python'] + sys.argv)
-                #os.execl(sys.executable, 'python', __file__, *sys.argv[1:])
-                #os.execl(sys.executable,sys.argv)
-                #os.execv('C:\\Program Files\\Python36\\python.exe', sys.argv)
+                os.execv(sys.executable, ['python']+ sys.argv)
                 break
             elif ev.key == pygame.K_ESCAPE:
                 print("poll?",score)
