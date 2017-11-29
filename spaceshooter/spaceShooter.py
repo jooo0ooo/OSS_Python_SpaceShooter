@@ -278,7 +278,75 @@ class Explosion(pygame.sprite.Sprite):
                 self.image = explosion_anim[self.size][self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.center = center
+## dbconnection
 
+class Highscore:
+    # Init higscore
+    def __init__(self, surface):
+
+        # Creates a sqlite connection to test.db, will be created if non-exist
+        connection = sqlite3.connect('test.db')
+        cursor = connection.cursor()
+
+        # Creates a table where name and score are stored
+        try:
+            cursor.execute('CREATE TABLE highscore (id INTEGER PRIMARY KEY, name VARCHAR(50), score INTEGER)')
+            cursor.close()
+        except sqlite3.Error as e:
+            cursor.close()
+
+        self.surface = surface
+        self.db = connection
+        self.cur = self.db.cursor()
+
+        # Updates highscore and store in database
+
+    def update(self, name, score, font):
+        player = []
+        i = 1
+
+        self.cur.execute("SELECT COUNT(*) FROM highscore")  # Check number of rows in table
+        result = self.cur.fetchall()
+        print(result)
+        nrecs = result[0][0]
+        print(nrecs)
+        if nrecs > 10:  # If 10 or more rows
+            self.cur.execute(
+                'SELECT * FROM highscore ORDER BY score DESC LIMIT 9,1')  # Compares the last row with the current score
+            last = self.cur.fetchone()
+            # print last
+            if last[2] < score:
+                try:
+                    self.cur.execute('UPDATE highscore SET name=?, score=? WHE  RE id=?',
+                                     (name, score, last[0]))  # Update the last row with new score and name
+                except sqlite3.Error as e:
+                    print("Ooops:11", e.args[0])
+        else:  # Add a new row in table
+            try:
+                self.cur.execute('INSERT INTO highscore VALUES (null, ?, ?)', (name, score))
+            except sqlite3.Error as e:
+                print("Ooops:222", e.args[0])
+
+        try:
+            self.cur.execute('SELECT * FROM highscore ORDER BY score DESC LIMIT 0,10')  # Choose the first 10 rows
+        except sqlite3.Error as e:
+            print("Ooops:33", e.args[0])
+        font = pygame.font.SysFont("arial", 20)
+        for row in self.cur:  # Loop though the rows and adds to a array
+            player.append(
+                font.render(str(i) + '. ' + str(row[1]) + "" * (8 - len(row[1])) +"    "+ str(row[2]), True, (255, 255, 255)))
+            i += 1
+
+        return player  # Return the array
+
+    # Genereate and prints highscore.
+    def draw(self, player, font):
+        i = 20
+        font2 = pygame.font.SysFont('Arial Black', 40)
+
+        for row in player:  # Loops through player and blits every row with 20px between
+            self.surface.blit(row, (self.surface.get_width() / 2 - 75, 180 + i))
+            i += 20
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -401,6 +469,7 @@ class Player(pygame.sprite.Sprite):
         self.hidden = True
         self.hide_timer = pygame.time.get_ticks()
         self.rect.center = (WIDTH / 2, HEIGHT + 200)
+
 
 # Code added by Jiwoo
 # For dual playing, add another player object
