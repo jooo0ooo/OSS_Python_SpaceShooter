@@ -403,7 +403,20 @@ class Player(pygame.sprite.Sprite):
         self.shield = 100
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
-        self.lives = 3
+        live_temp = open(path.join(make_dialog,'setting.txt'),"r",encoding="utf-8")
+        read_live = live_temp.readline().split()[0]
+        Level = read_live.split("=")[1]
+        if Level == "Level1":
+            self.lives=5
+        elif Level =="Level2":
+            self.lives=4
+        elif Level =="Level3":
+            self.lives = 3
+        elif Level =="Level4":
+            self.lives=2
+        elif Level =="Level5":
+            self.lives=1
+        live_temp.close()
         self.hidden = False
         self.hide_timer = pygame.time.get_ticks()
         self.power = 1
@@ -525,7 +538,20 @@ class Player2(pygame.sprite.Sprite):
         self.shield = 100
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
-        self.lives = 3
+        live_temp = open(path.join(make_dialog,'setting.txt'),"r",encoding="utf-8")
+        read_live = live_temp.readline().split()[0]
+        Level = read_live.split("=")[1]
+        if Level == "Level1":
+            self.lives=5
+        elif Level =="Level2":
+            self.lives=4
+        elif Level =="Level3":
+            self.lives = 3
+        elif Level =="Level4":
+            self.lives=2
+        elif Level =="Level5":
+            self.lives=1
+        live_temp.close()
         self.hidden = False
         self.hide_timer = pygame.time.get_ticks()
         self.power = 1
@@ -795,21 +821,57 @@ class Missile(pygame.sprite.Sprite):
 
 ###################################################
 ## Load all game images
-
+##배경화면이미지
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
+####
 background_rect = background.get_rect()
-## ^^ draw this rect first 
+## ^^ draw this rect first
+read_color = open(path.join(make_dialog, 'setting.txt'),"r",encoding="utf-8")
+read_temp = read_color.readline()
+P1_temp = read_temp.split()[1]
+P2_temp = read_temp.split()[2]
+P1_Color = P1_temp.split("=")[1]
+P2_Color = P2_temp.split("=")[1]
 
-player_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
+if P1_Color=="RED":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
+elif P1_Color=="BLUE":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_blue.png')).convert()
+elif P1_Color == "GOLD":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_gold.png')).convert()
+elif P1_Color=="YELLOW":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_yellow.png')).convert()
+elif P1_Color=="PURPLE":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_purple.png')).convert()
+elif P1_Color=="PINK":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_pink.png')).convert()
+elif P1_Color=="ORANGE":
+    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
 
 # Code added by Jiwoo
 # Setting for another player
-player2_img = pygame.image.load(path.join(img_dir, 'playerShip2_orange.png')).convert()
+
+
+if P2_Color=="RED":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
+elif P2_Color=="BLUE":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_blue.png')).convert()
+elif P2_Color == "GOLD":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_gold.png')).convert()
+elif P2_Color=="YELLOW":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_yellow.png')).convert()
+elif P2_Color=="PURPLE":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_purple.png')).convert()
+elif P2_Color=="PINK":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_pink.png')).convert()
+elif P2_Color=="ORANGE":
+    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
+
 player_mini_img2 = pygame.transform.scale(player2_img, (25, 19))
 player_mini_img2.set_colorkey(BLACK)
-
+read_color.close()
 bullet_img = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
 missile_img = pygame.image.load(path.join(img_dir, 'missile.png')).convert_alpha()
 # meteor_img = pygame.image.load(path.join(img_dir, 'meteorBrown_med1.png')).convert()
