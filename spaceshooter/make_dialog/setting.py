@@ -91,7 +91,7 @@ class MySetting(QMainWindow):
         Setting_text_file.write(temp)
 
         Setting_text_file.close()
-        subprocess.call(['python3', '../spaceShooter.py'])
+        subprocess.call(['python', '../spaceShooter.py'],shell=True)
         #sys.exit()
 
 
