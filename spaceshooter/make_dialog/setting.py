@@ -7,6 +7,7 @@ from os import path
 import os
 import platform
 import subprocess
+import pygame
 import easygui
 make_dialog = path.join(path.dirname(__file__), 'make_dialog')
 img_dir = path.join(path.dirname(__file__), '../assets')
@@ -92,10 +93,12 @@ class MySetting(QMainWindow):
         Setting_text_file.write(temp)
 
         Setting_text_file.close()
-        if platform.system() == "Windows":
-            subprocess.call(['python', path.join(make_dialog, 'select_my_music.py')], shell=True)
-        else:
-            subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')], shell=True)
+        print(platform.system())
+        subprocess.call(['python','../spaceShooter.py'])
+       # if platform.system() == "Windows":
+       #     subprocess.call(['python', '../spaceShooter.py'], shell=True)
+       # elif platform.system()=="Darwin":
+       #     subprocess.call(['python3', '../spaceShooter.py'],shell=True)
         #sys.exit()
 
 
