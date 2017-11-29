@@ -212,12 +212,15 @@ def game_over():
                 os.execv(sys.executable, ['python']+ sys.argv)
                 break
             elif ev.key == pygame.K_ESCAPE:
-                print("poll?",score)
-                pygame.quit()
-                highscore.cur.close()
-                highscore.db.commit()
-                highscore.db.close()
-                quit()
+                if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
+                    pygame.quit()
+                    highscore.cur.close()
+                    highscore.db.commit()
+                    highscore.db.close()
+                    quit()
+                else:
+                    continue
+
         else:
 
             draw_text(screen, "GAME OVER", 80, WIDTH/2, HEIGHT/2 - 200)
@@ -1024,7 +1027,13 @@ while running:
         ## Press ESC to exit game
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                running = False
+                if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
+                    running = False
+                    pygame.quit()
+                    quit()
+                else:
+                    continue
+
         # ## event for shooting the bullets
         # elif event.type == pygame.KEYDOWN:
         #     if event.key == pygame.K_SPACE:
