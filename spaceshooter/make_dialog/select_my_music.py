@@ -12,7 +12,6 @@ openFileDialog = wx.FileDialog(frame, "Open", "", "",
                                    "mp3 files (*.mp3)|*.mp3",
                                    wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 openFileDialog.ShowModal()
-openFileDialog.Destroy()
 f = open(path.join(text_dir, 'user_music_location.txt'), 'w')
 f.write(openFileDialog.GetPath())
-f.close
+f.close()

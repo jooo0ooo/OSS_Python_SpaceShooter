@@ -17,6 +17,8 @@ from __future__ import division
 import pygame
 import random
 from os import path
+import platform
+import inputbox
 
 #Code added by doo
 from tkinter import *
@@ -25,10 +27,12 @@ from tkinter import messagebox
 #Code added by Jiwoo
 #for using bash
 #we should 'import subprocess' for using subprocess Module
+
 import subprocess
 
 import os
 import sys
+import sqlite3
 
 ## assets folder
 img_dir = path.join(path.dirname(__file__), 'assets')
@@ -140,7 +144,10 @@ def main_menu():
             # When the user press the T-key on keyboard, go into the conditional statement
             elif ev.key == pygame.K_t:
                 #Use subprocess Module to execute bash command in a python script
-                subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')])
+                if platform.system()=="Windows":
+                    subprocess.call(['python', path.join(make_dialog, 'select_my_music.py')],shell=True)
+                else:
+                    subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')], shell=True)
                 #change value of music_flag
                 music_flag = 1
                 break
@@ -177,30 +184,59 @@ def game_over():
     global screen
     global running
 
+    i = 1
+    s_player=[]
     menu_song = pygame.mixer.music.load(path.join(sound_folder, "menu.ogg"))
     pygame.mixer.music.play(-1)
+    font = pygame.font.SysFont('Arial Black', 17)
 
     title = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
     title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
-
-
+    player_name = inputbox.ask(screen, "Your name ")
+    s_player = highscore.update(player_name,score,font)
     screen.blit(title, (0,0))
+    pygame.display.update()
 
+
+    title = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
+    screen.blit(title, (0, 0))
     pygame.display.update()
 
     while True:
         ev = pygame.event.poll()
         if ev.type == pygame.KEYDOWN:
             if ev.key == pygame.K_RETURN:
-                os.execv(sys.executable, [sys.executable] + sys.argv)
+                highscore.cur.close()
+                highscore.db.commit()
+                highscore.db.close()
+                print(sys.executable)
+                print(sys.argv)
+                print([sys.executable] + sys.argv)
+                executable = sys.executable
+                args = sys.argv[:]
+                args.insert(0,sys.executable)
+                os.execvp(sys.executable,sys.argv)
+                #1os.execv(__file__,sys.argv)
+                #os.execv(sys.executable, ['python'] + sys.argv)
+                #os.execl(sys.executable, 'python', __file__, *sys.argv[1:])
+                #os.execl(sys.executable,sys.argv)
+                #os.execv('C:\\Program Files\\Python36\\python.exe', sys.argv)
                 break
             elif ev.key == pygame.K_ESCAPE:
+                print("poll?",score)
                 pygame.quit()
+                highscore.cur.close()
+                highscore.db.commit()
+                highscore.db.close()
                 quit()
         else:
-            draw_text(screen, "GAME OVER", 100, WIDTH/2, HEIGHT/2 - 200)
-            draw_text(screen, "Press [ENTER] To Play Again", 30, WIDTH/2, HEIGHT/2)
-            draw_text(screen, "or [ESC] To Quit", 30, WIDTH/2, (HEIGHT/2)+40)
+
+            draw_text(screen, "GAME OVER", 80, WIDTH/2, HEIGHT/2 - 200)
+            highscore.draw(s_player,font)
+            draw_text(screen, "Press [ENTER] To Play Again", 30, WIDTH/2, HEIGHT-100)
+            draw_text(screen, "or [ESC] To Quit", 30, WIDTH/2, HEIGHT-50)
+            score_temp = player_name + " : " + str(score)
+            draw_text(screen, score_temp, 30, WIDTH/2, (HEIGHT/2)+150)
             pygame.display.update()
 
 
@@ -893,6 +929,7 @@ menu_display = True
 while running:
     if menu_display:
         main_menu()
+        highscore = Highscore(screen)
         pygame.time.wait(3000)
 
         #Stop menu music
