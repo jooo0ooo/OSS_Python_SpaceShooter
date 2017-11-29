@@ -5,9 +5,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QPixmap
 from os import path
 import os
+import platform
 import subprocess
 import easygui
-
+make_dialog = path.join(path.dirname(__file__), 'make_dialog')
 img_dir = path.join(path.dirname(__file__), '../assets')
 
 class MySetting(QMainWindow):
@@ -91,7 +92,10 @@ class MySetting(QMainWindow):
         Setting_text_file.write(temp)
 
         Setting_text_file.close()
-        subprocess.call(['python', '../spaceShooter.py'],shell=True)
+        if platform.system() == "Windows":
+            subprocess.call(['python', path.join(make_dialog, 'select_my_music.py')], shell=True)
+        else:
+            subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')], shell=True)
         #sys.exit()
 
 
