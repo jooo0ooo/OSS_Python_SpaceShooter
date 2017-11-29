@@ -147,7 +147,7 @@ def main_menu():
                 if platform.system()=="Windows":
                     subprocess.call(['python', path.join(make_dialog, 'select_my_music.py')],shell=True)
                 else:
-                    subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')], shell=True)
+                    subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')])
                 #change value of music_flag
                 music_flag = 1
                 break
@@ -994,7 +994,7 @@ while running:
         if music_flag == 1:
             #Read the user's music path
             text_dir = path.join(path.dirname(__file__), 'text')
-            f = open(path.join(text_dir, 'user_music_location.txt'), 'r')
+            f = open(path.join(text_dir, 'user_music_location.txt'), 'r',encoding="utf-8")
             line = f.readline()
             my_song = line
             f.close()

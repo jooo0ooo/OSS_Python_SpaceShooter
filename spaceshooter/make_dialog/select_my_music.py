@@ -14,4 +14,5 @@ openFileDialog = wx.FileDialog(frame, "Open", "", "",
 openFileDialog.ShowModal()
 f = open(path.join(text_dir, 'user_music_location.txt'), 'w',encoding="utf-8")
 f.write(openFileDialog.GetPath())
+openFileDialog.Destroy()
 f.close()

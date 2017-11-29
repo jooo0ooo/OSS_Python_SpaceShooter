@@ -94,11 +94,11 @@ class MySetting(QMainWindow):
 
         Setting_text_file.close()
         print(platform.system())
-        subprocess.call(['python','../spaceShooter.py'])
-       # if platform.system() == "Windows":
-       #     subprocess.call(['python', '../spaceShooter.py'], shell=True)
-       # elif platform.system()=="Darwin":
-       #     subprocess.call(['python3', '../spaceShooter.py'],shell=True)
+        #subprocess.call(['python3','../spaceShooter.py'])
+        if platform.system() == "Windows":
+            subprocess.call(['python', '../spaceShooter.py'], shell=True)
+        else:
+            subprocess.call(['python3', '../spaceShooter.py'])
         #sys.exit()
 
 
