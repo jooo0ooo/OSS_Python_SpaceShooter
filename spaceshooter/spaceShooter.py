@@ -37,6 +37,7 @@ import sqlite3
 ## assets folder
 img_dir = path.join(path.dirname(__file__), 'assets')
 sound_folder = path.join(path.dirname(__file__), 'sounds')
+text_dir = path.join(path.dirname(__file__), 'text')
 
 #Code added by doo
 root = Tk() ##tk 윈도우 생성
@@ -80,104 +81,6 @@ clock = pygame.time.Clock()     ## For syncing the FPS
 
 font_name = pygame.font.match_font('arial')
 
-# Code added by Jiwoo
-# To Show Operation Guide
-def operation_guide():
-    global screen
-
-    title = pygame.image.load(path.join(img_dir, "operation_guide.png")).convert()
-    title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
-
-    screen.blit(title, (0,0))
-    pygame.display.update()
-    
-    while True:
-        #When the user pulls off his hand from TAB-key
-        #go back to the menu screen
-        ev = pygame.event.poll()
-        if ev.type == pygame.KEYUP:
-            if ev.key == pygame.K_TAB:
-                title = pygame.image.load(path.join(img_dir, "main.png")).convert()
-                title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
-                screen.blit(title, (0, 0))
-
-                draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH / 2, HEIGHT / 2)
-                draw_text(screen, "or [Q] To Quit", 30, WIDTH / 2, (HEIGHT / 2) + 40)
-                draw_text(screen, "Press [T] To Play With Ur Music", 30, WIDTH / 2, (HEIGHT / 2) + 80)
-                draw_text(screen, "Press [D] To Play With A Friend", 30, WIDTH / 2, (HEIGHT / 2) + 120)
-                draw_text(screen, "Press [TAB] To See Operation Guide", 25, WIDTH / 2, (HEIGHT - 40))
-                pygame.display.update()
-                break
-
-
-def main_menu():
-    global screen
-
-    # Code added by Jiwoo
-    global music_flag #To use global variable, music_flag
-    global dual_play_flag #To use global variable, dual_play_flag
-
-    menu_song = pygame.mixer.music.load(path.join(sound_folder, "menu.ogg"))
-    pygame.mixer.music.play(-1)
-
-    title = pygame.image.load(path.join(img_dir, "main.png")).convert()
-    title = pygame.transform.scale(title, (WIDTH, HEIGHT), screen)
-
-    screen.blit(title, (0,0))
-    pygame.display.update()
-
-    while True:
-        ev = pygame.event.poll()
-        if ev.type == pygame.KEYDOWN:
-            if ev.key == pygame.K_RETURN:
-                break
-            elif ev.key == pygame.K_q:
-                #Code added by doo
-                if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
-                    pygame.quit()
-                    quit()
-                else:
-                    continue
-                quit()
-
-            # Code added by Jiwoo
-            # When the user press the T-key on keyboard, go into the conditional statement
-            elif ev.key == pygame.K_t:
-                #Use subprocess Module to execute bash command in a python script
-                if platform.system()=="Windows":
-                    subprocess.call(['python', path.join(make_dialog, 'select_my_music.py')],shell=True)
-                else:
-                    subprocess.call(['python3', path.join(make_dialog, 'select_my_music.py')])
-                #change value of music_flag
-                music_flag = 1
-                break
-            # When the user press the D-key on keyboard, go into the conditional statement
-            elif ev.key == pygame.K_d:
-                #change value of dual_play_flag
-                dual_play_flag = 1
-                break
-            #when the user press the TAB-key on keyboard, he can see the operation guide
-            elif ev.key == pygame.K_TAB:
-                operation_guide()
-
-        else:
-            draw_text(screen, "Press [ENTER] To Begin", 30, WIDTH/2, HEIGHT/2)
-            draw_text(screen, "or [Q] To Quit", 30, WIDTH/2, (HEIGHT/2)+40)
-
-            # Code added by Jiwoo
-            #Add Text in main_menu to give users additional option
-            draw_text(screen, "Press [T] To Play With Ur Music", 30, WIDTH/2, (HEIGHT/2)+80)
-            draw_text(screen, "Press [D] To Play With A Friend", 30, WIDTH/2, (HEIGHT/2)+120)
-            draw_text(screen, "Press [TAB] To See Operation Guide", 25, WIDTH / 2, (HEIGHT - 40))
-
-            pygame.display.update()
-
-    #pygame.mixer.music.stop()
-    ready = pygame.mixer.Sound(path.join(sound_folder,'getready.ogg'))
-    ready.play()
-    screen.fill(BLACK)
-    draw_text(screen, "GET READY!", 40, WIDTH/2, HEIGHT/2)
-    pygame.display.update()
 
 # Code added by Jiwoo
 def game_over():
@@ -213,6 +116,16 @@ def game_over():
                 break
             elif ev.key == pygame.K_ESCAPE:
                 if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
+
+                    game_text_file = open(path.join(text_dir, 'game_setting.txt'), "w", encoding="utf-8")
+                    temp = ""
+                    game_text_file.write(temp)
+                    game_text_file.close()
+                    music_text_file = open(path.join(text_dir, 'user_music_location.txt'), "w", encoding="utf-8")
+                    temp2 = ""
+                    music_text_file.write(temp2)
+                    music_text_file.close()
+
                     pygame.quit()
                     highscore.cur.close()
                     highscore.db.commit()
@@ -395,7 +308,7 @@ class Player(pygame.sprite.Sprite):
         self.shield = 100
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
-        live_temp = open(path.join(make_dialog,'setting.txt'),"r",encoding="utf-8")
+        live_temp = open(path.join(text_dir,'game_setting.txt'),"r",encoding="utf-8")
         read_live = live_temp.readline().split()[0]
         Level = read_live.split("=")[1]
         if Level == "Level1":
@@ -530,7 +443,7 @@ class Player2(pygame.sprite.Sprite):
         self.shield = 100
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
-        live_temp = open(path.join(make_dialog,'setting.txt'),"r",encoding="utf-8")
+        live_temp = open(path.join(text_dir,'game_setting.txt'),"r",encoding="utf-8")
         read_live = live_temp.readline().split()[0]
         Level = read_live.split("=")[1]
         if Level == "Level1":
@@ -813,57 +726,53 @@ class Missile(pygame.sprite.Sprite):
 
 ###################################################
 ## Load all game images
-##배경화면이미지
+
+f = open(path.join(text_dir, 'user_music_location.txt'), 'r', encoding="utf-8")
+read_line = f.readline()
+user_song = read_line
+f.close()
+if user_song == "":
+    music_flag = 0
+    print (user_song)
+else:
+    music_flag = 1
+    print (user_song)
+
+
+read_color = open(path.join(text_dir, 'game_setting.txt'),"r",encoding="utf-8")
+read_temp = read_color.readline()
+
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
 ####
 background_rect = background.get_rect()
 ## ^^ draw this rect first
-read_color = open(path.join(make_dialog, 'setting.txt'),"r",encoding="utf-8")
-read_temp = read_color.readline()
+
 P1_temp = read_temp.split()[1]
 P2_temp = read_temp.split()[2]
 P1_Color = P1_temp.split("=")[1]
 P2_Color = P2_temp.split("=")[1]
 
-if P1_Color=="RED":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
-elif P1_Color=="BLUE":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_blue.png')).convert()
-elif P1_Color == "GOLD":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_gold.png')).convert()
-elif P1_Color=="YELLOW":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_yellow.png')).convert()
-elif P1_Color=="PURPLE":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_purple.png')).convert()
-elif P1_Color=="PINK":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_pink.png')).convert()
-elif P1_Color=="ORANGE":
-    player_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
-player_mini_img = pygame.transform.scale(player_img, (25, 19))
-player_mini_img.set_colorkey(BLACK)
+if P2_Color == "":
+    dual_play_flag = 0
+    player_img = pygame.image.load(path.join(img_dir, P1_Color)).convert()
+    player2_img = pygame.image.load(path.join(img_dir, "playerShip1_gold.png")).convert()
+else :
+    dual_play_flag = 1
+    player_img = pygame.image.load(path.join(img_dir, P1_Color)).convert()
+    player2_img = pygame.image.load(path.join(img_dir, P2_Color)).convert()
+
+
 
 # Code added by Jiwoo
 # Setting for another player
 
 
-if P2_Color=="RED":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
-elif P2_Color=="BLUE":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_blue.png')).convert()
-elif P2_Color == "GOLD":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_gold.png')).convert()
-elif P2_Color=="YELLOW":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_yellow.png')).convert()
-elif P2_Color=="PURPLE":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_purple.png')).convert()
-elif P2_Color=="PINK":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_pink.png')).convert()
-elif P2_Color=="ORANGE":
-    player2_img = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
-
+player_mini_img = pygame.transform.scale(player_img, (25, 19))
+player_mini_img.set_colorkey(BLACK)
 player_mini_img2 = pygame.transform.scale(player2_img, (25, 19))
 player_mini_img2.set_colorkey(BLACK)
 read_color.close()
+
 bullet_img = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
 missile_img = pygame.image.load(path.join(img_dir, 'missile.png')).convert_alpha()
 # meteor_img = pygame.image.load(path.join(img_dir, 'meteorBrown_med1.png')).convert()
@@ -982,7 +891,7 @@ running = True
 menu_display = True
 while running:
     if menu_display:
-        main_menu()
+        #main_menu()
         highscore = Highscore(screen)
         pygame.time.wait(3000)
 
@@ -993,7 +902,7 @@ while running:
         # Code added by Jiwoo
         if music_flag == 1:
             #Read the user's music path
-            text_dir = path.join(path.dirname(__file__), 'text')
+
             f = open(path.join(text_dir, 'user_music_location.txt'), 'r',encoding="utf-8")
             line = f.readline()
             my_song = line
@@ -1003,19 +912,19 @@ while running:
             pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
 
         #Setting for dual play mode
-        elif dual_play_flag == 1:
+        if dual_play_flag == 1:
             all_sprites.add(player2)
             player.rect.centerx = WIDTH / 3
             player.rect.bottom = HEIGHT
-            pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-            pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
 
-        elif music_flag == 0:
+        if music_flag == 0:
             #default play
             pygame.mixer.music.load(path.join(sound_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
             pygame.mixer.music.play(-1)  ## makes the gameplay sound in an endless loop
 
+
         menu_display = False
+
         
     #1 Process input/events
     clock.tick(FPS)     ## will make the loop run at the same speed all the time
@@ -1028,6 +937,17 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 if messagebox.askokcancel("GAME EXIT", "정말로 종료하시겠습니까?") == TRUE:
+
+                    game_text_file = open(path.join(text_dir, 'game_setting.txt'), "w", encoding="utf-8")
+                    temp = ""
+                    game_text_file.write(temp)
+                    game_text_file.close()
+
+                    music_text_file = open(path.join(text_dir, 'user_music_location.txt'), "w", encoding="utf-8")
+                    temp2 = ""
+                    music_text_file.write(temp2)
+                    music_text_file.close()
+
                     running = False
                     pygame.quit()
                     quit()
@@ -1212,6 +1132,16 @@ while running:
     draw_lives(screen, WIDTH - 150, 5, player.lives, player_mini_img)
 
     ## Done after drawing everything to the screen
-    pygame.display.flip()       
+    pygame.display.flip()
+
+
+game_text_file = open(path.join(text_dir, 'game_setting.txt'),"w",encoding="utf-8")
+temp = ""
+game_text_file.write(temp)
+game_text_file.close()
+music_text_file = open(path.join(text_dir, 'user_music_location.txt'), "w", encoding="utf-8")
+temp2 = ""
+music_text_file.write(temp2)
+music_text_file.close()
 
 pygame.quit()
